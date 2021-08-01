@@ -1,3 +1,4 @@
+[![build](https://github.com/joekendal/aws-oauth-rotator/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/joekendal/aws-oauth-rotator/actions/workflows/build.yml)
 # AWS Oauth Rotation
 
 This is a CDK stack that automatically updates an OAuth access token using AWS Secrets Manager
