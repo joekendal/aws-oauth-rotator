@@ -5,6 +5,10 @@ on: [pull_request, push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      AUTH_URL: ${{ secrets.AUTH_URL }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -12,7 +16,4 @@ jobs:
           node-version: 14
       - run: npm ci
       - run: npm test
-        env:
-          OAUTH_CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          OAUTH_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-          OAUTH_URL: ${{ secrets.AUTH_URL }}
+        
