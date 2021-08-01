@@ -2,6 +2,7 @@ import * as cdk from '@aws-cdk/core';
 import * as secretsmanager from '@aws-cdk/aws-secretsmanager'
 import * as lambda from '@aws-cdk/aws-lambda-nodejs'
 
+
 export interface OAuthRotateProps {
   clientId: string;
   clientSecret: string;
@@ -30,7 +31,7 @@ export class OAuthRotate extends cdk.Construct {
       automaticallyAfter: props.every
     })
 
-    new cdk.CfnOutput(this, 'OAuthSecretName', {
+    new cdk.CfnOutput(this, 'SecretName', {
       exportName: 'SecretName',
       value: secret.secretName
     })

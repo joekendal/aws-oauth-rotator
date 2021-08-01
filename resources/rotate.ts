@@ -6,6 +6,13 @@ import {
   UpdateSecretVersionStageCommand,
   UpdateSecretVersionStageCommandInput,
   UpdateSecretVersionStageCommandOutput,
+  ListSecretVersionIdsCommand,
+  ListSecretVersionIdsCommandOutput,
+  DescribeSecretCommand,
+  CreateSecretCommand,
+  CreateSecretCommandInput,
+  GetSecretValueCommand,
+  GetSecretValueCommandInput,
 } from "@aws-sdk/client-secrets-manager"
 import { assert } from "console"
 import { format, parse } from "url"
@@ -41,7 +48,7 @@ export const getToken = async () => {
     }
   }))
 
-  var accessToken
+  var accessToken: string | undefined;
 
   // post auth creds
   await fetch(url.href!, { 
@@ -61,16 +68,42 @@ export const getToken = async () => {
   return accessToken
 }
 
+const getSecret = async (secretId: string, stage: string, clientRequestToken?: string) => {
+  const input: GetSecretValueCommandInput = {
+    SecretId: secretId,
+    VersionStage: stage,
+    VersionId: clientRequestToken
+  }
+  const command = new GetSecretValueCommand(input)
+  try {
+    const out = await client.send(command)
+    return out.SecretString
+  } catch (err) {
+    return
+  }  
+}
+
 const create = async (secretId: string, clientRequestToken: string) => {
+  var currentSecret = await getSecret(secretId, "AWSCURRENT")
+  if(!currentSecret) return
+
   // get new access token
-  const token = await getToken()
-  if(!token) new Error("Access Token is undefined")
+  const newToken = await getToken()
+  if(!newToken) new Error("Access Token is undefined")
 
   const input: PutSecretValueCommandInput = {
     SecretId: secretId,
-    // ClientRequestToken: clientRequestToken,
-    SecretString: token,
+    ClientRequestToken: clientRequestToken,
     VersionStages: ["AWSPENDING"]
+  }
+
+  // get current pending and update it if exists else create new pending
+  const pendingSecret = await getSecret(secretId, "AWSPENDING", clientRequestToken)
+  if(!pendingSecret){
+    currentSecret = newToken
+    input.SecretString = currentSecret
+  } else {
+    input.SecretString = pendingSecret
   }
 
   const command = new PutSecretValueCommand(input)
@@ -80,12 +113,37 @@ const create = async (secretId: string, clientRequestToken: string) => {
   console.log(res)
 }
 
+const getCurrentVersion = async (secretId: string, clientRequestToken: string) => {
+  const metadata = await client.send(new DescribeSecretCommand({
+    SecretId: secretId
+  }))
+  var currentVersion;
+
+  // loop through mapping to find current version
+  for (const version in metadata.VersionIdsToStages) {
+    if (Object.prototype.hasOwnProperty.call(metadata.VersionIdsToStages, version)) {
+      const element = metadata.VersionIdsToStages[version];
+      if(element.includes("AWSCURRENT")){
+        // if correct version already marked as current
+        if(version === clientRequestToken) return
+        currentVersion = version
+        break
+      }
+    }
+  }
+
+  return currentVersion;
+}
+
 const finish = async (secretId: string, clientRequestToken: string) => {
 
+  const currentVersion = await getCurrentVersion(secretId, clientRequestToken)
+  
   const input: UpdateSecretVersionStageCommandInput = {
     SecretId: secretId,
     VersionStage: "AWSCURRENT",
-    // MoveToVersionId: clientRequestToken,
+    MoveToVersionId: clientRequestToken,
+    RemoveFromVersionId: currentVersion
   }
   const command = new UpdateSecretVersionStageCommand(input)
 

@@ -23,6 +23,6 @@ export class OAuthRotateStack extends cdk.Stack {
   }
 }
 
-new OAuthRotateStack(app, 'OauthRotateStack', {
+new OAuthRotateStack(app, 'OAuthRotateStack', {
   env: envDev
 });
