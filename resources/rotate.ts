@@ -29,6 +29,7 @@ const client = new SecretsManagerClient({
 })
 
 export const getToken = async () => {
+  // prepare url
   const url = parse(format({
     protocol: 'https',
     hostname: process.env.AUTH_URL!,
@@ -42,6 +43,7 @@ export const getToken = async () => {
 
   var accessToken
 
+  // post auth creds
   await fetch(url.href!, { 
     method: 'POST',
     headers: { 
@@ -50,7 +52,7 @@ export const getToken = async () => {
   })
     .then(async res => await res.json())
     .then(json => {
-      accessToken = json
+      accessToken = json.access_token
     })
     .catch(err => {
       console.log(err)
@@ -78,14 +80,6 @@ const create = async (secretId: string, clientRequestToken: string) => {
   console.log(res)
 }
 
-const set = () => {
-  console.info("setSecret not processed.")
-}
-
-const test = () => {
-  console.info("testSecret not processed.")
-}
-
 const finish = async (secretId: string, clientRequestToken: string) => {
 
   const input: UpdateSecretVersionStageCommandInput = {
@@ -106,12 +100,6 @@ export const handler = (event: RotateSecretEvent) => {
   switch (event.Step) {
     case SecretStep.create:
       create(event.SecretId, event.ClientRequestToken)
-      break;
-    case SecretStep.set:
-      set()
-      break;
-    case SecretStep.test:
-      test()
       break;
     case SecretStep.finish:
       finish(event.SecretId, event.ClientRequestToken)
