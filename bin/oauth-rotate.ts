@@ -9,15 +9,19 @@ const envDev = {
   region: process.env.CDK_DEFAULT_REGION
 }
 
+export interface OAuthRotateStackProps extends cdk.StackProps {
+  secretName?: string;
+}
+
 export class OAuthRotateStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, props?: cdk.StackProps){
+  constructor(scope: cdk.App, id: string, props?: OAuthRotateStackProps){
     super(scope, id, props)
 
     new OAuthRotate(this, 'OAuthRotate', {
       clientId: process.env.CLIENT_ID!,
       clientSecret: process.env.CLIENT_SECRET!,
       authUrl: process.env.AUTH_URL!,
-      every: cdk.Duration.days(1)
+      secretName: props?.secretName
     })
 
   }
