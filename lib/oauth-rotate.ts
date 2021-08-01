@@ -18,16 +18,21 @@ export class OAuthRotate extends cdk.Construct {
     const rotate = new lambda.NodejsFunction(this, 'OAuthCreate', {
       entry: 'resources/rotate.ts',
       environment: {
-        OAUTH_SECRET_REGION: secret.stack.region!,
-        OAUTH_CLIENT_ID: props.clientId,
-        OAUTH_CLIENT_SECRET: props.clientSecret,
-        OAUTH_URL: props.authUrl
+        SECRET_REGION: secret.stack.region!,
+        CLIENT_ID: props.clientId,
+        CLIENT_SECRET: props.clientSecret,
+        AUTH_URL: props.authUrl
       }
     })
     
     secret.addRotationSchedule('RotationSchedule', {
       rotationLambda: rotate,
       automaticallyAfter: props.every
+    })
+
+    new cdk.CfnOutput(this, 'OAuthSecretName', {
+      exportName: 'SecretName',
+      value: secret.secretName
     })
   }
 }

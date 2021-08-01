@@ -12,10 +12,10 @@ beforeAll(() => {
 
 test('Lambda Function Created', () => {
   const hasEnvs = ({ Variables: envs }: { Variables: any }) => {
-    expect(envs).toHaveProperty("OAUTH_SECRET_REGION")
-    expect(envs).toHaveProperty("OAUTH_CLIENT_ID")
-    expect(envs).toHaveProperty("OAUTH_CLIENT_SECRET")
-    expect(envs).toHaveProperty("OAUTH_URL")
+    expect(envs).toHaveProperty("SECRET_REGION")
+    expect(envs).toHaveProperty("CLIENT_ID")
+    expect(envs).toHaveProperty("CLIENT_SECRET")
+    expect(envs).toHaveProperty("AUTH_URL")
     return true
   }
   expectCDK(stack).to(haveResource("AWS::Lambda::Function", {

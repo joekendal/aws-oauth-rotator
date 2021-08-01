@@ -8,9 +8,8 @@ import {
   UpdateSecretVersionStageCommandOutput,
 } from "@aws-sdk/client-secrets-manager"
 import { assert } from "console"
-import { get } from "https"
 import { format, parse } from "url"
-
+import fetch from 'node-fetch';
 
 type RotateSecretEvent = {
   ClientRequestToken: string;
@@ -26,40 +25,44 @@ enum SecretStep {
 }
 
 const client = new SecretsManagerClient({ 
-  region: process.env.OAUTH_SECRET_REGION 
+  region: process.env.SECRET_REGION 
 })
 
-const getToken = async () => {
+export const getToken = () => {
   const url = parse(format({
     protocol: 'https',
-    hostname: process.env.OAUTH_URL!,
+    hostname: process.env.AUTH_URL!,
     pathname: '/oauth2/token',
     query: {
-      'client_id': process.env.OAUTH_CLIENT_ID!,
-      'client_secret': process.env.OAUTH_CLIENT_SECRET!,
+      'client_id': process.env.CLIENT_ID!,
+      'client_secret': process.env.CLIENT_SECRET!,
       'grant_type': 'client_credentials'
     }
   }))
-  console.log(url)
 
   var accessToken
 
-  get(url, (res) => {
-    res.on('data', (data) => {
-      console.log(data)
-      accessToken = data
+  fetch(url.href!, { 
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+    .then(res => res.json())
+    .then(json => {
+      accessToken = json
     })
-  }).on('error', (e) => {
-    console.error(e);
-  }).end()
+    .catch(err => {
+      console.log(err)
+    })
 
   return accessToken
 }
 
 const create = async (secretId: string, clientRequestToken: string) => {
   // get new access token
-  const token = await getToken()
-  assert(token)
+  const token = getToken()
+  if(!token) new Error("Access Token is undefined")
 
   const input: PutSecretValueCommandInput = {
     SecretId: secretId,
