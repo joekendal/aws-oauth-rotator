@@ -1,15 +1,9 @@
-# Welcome to your CDK TypeScript project!
+# AWS Oauth Rotation
 
-You should explore the contents of this project. It demonstrates a CDK app with an instance of a stack (`AwsOauthRotateStack`)
-which contains an Amazon SQS queue that is subscribed to an Amazon SNS topic.
+This is a CDK stack that automatically updates an OAuth access token using AWS Secrets Manager
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Commands
 
-## Useful commands
-
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
  * `cdk deploy`      deploy this stack to your default AWS account/region
  * `cdk diff`        compare deployed stack with current state
  * `cdk synth`       emits the synthesized CloudFormation template
