@@ -28,7 +28,7 @@ const client = new SecretsManagerClient({
   region: process.env.SECRET_REGION 
 })
 
-export const getToken = () => {
+export const getToken = async () => {
   const url = parse(format({
     protocol: 'https',
     hostname: process.env.AUTH_URL!,
@@ -42,13 +42,13 @@ export const getToken = () => {
 
   var accessToken
 
-  fetch(url.href!, { 
+  await fetch(url.href!, { 
     method: 'POST',
     headers: { 
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   })
-    .then(res => res.json())
+    .then(async res => await res.json())
     .then(json => {
       accessToken = json
     })
@@ -61,7 +61,7 @@ export const getToken = () => {
 
 const create = async (secretId: string, clientRequestToken: string) => {
   // get new access token
-  const token = getToken()
+  const token = await getToken()
   if(!token) new Error("Access Token is undefined")
 
   const input: PutSecretValueCommandInput = {
