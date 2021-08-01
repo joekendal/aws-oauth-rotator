@@ -12,3 +12,9 @@ jobs:
           node-version: 14
       - run: npm ci
       - run: npm test
+        env:
+          # Pass tests with no deployment
+          OAUTH_SECRET_REGION: ""
+          OAUTH_CLIENT_ID: ""
+          OAUTH_CLIENT_SECRET: ""
+          OAUTH_URL: ""
